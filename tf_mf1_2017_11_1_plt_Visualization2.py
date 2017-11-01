@@ -23,12 +23,15 @@ y_data=np.square(x_data)-0.5+noise
 
 xs=tf.placeholder(tf.float32,[None,1])
 ys=tf.placeholder(tf.float32,[None,1])
+
 l1=add_layer(xs,1,10,activation_function=tf.nn.relu)
-prediction=add_layer(l1,10,1,activation_function=None)
+l2=add_layer(l1,10,10,activation_function=tf.nn.relu)
+
+prediction=add_layer(l2,10,1,activation_function=None)
 
 loss=tf.reduce_mean(tf.reduce_sum(tf.square(ys-prediction),
                                   reduction_indices=[1]))
-train_step=tf.train.GradientDescentOptimizer(0.2).minimize(loss)
+train_step=tf.train.GradientDescentOptimizer(0.1).minimize(loss)
 
 #initialize the Variable
 init=tf.global_variables_initializer()
