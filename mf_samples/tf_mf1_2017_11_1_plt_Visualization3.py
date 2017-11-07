@@ -1,4 +1,5 @@
 ##About the basic training of the data, y=ax+b
+#!/usr/bin/sudo python
 
 import tensorflow as tf
 import numpy as np
