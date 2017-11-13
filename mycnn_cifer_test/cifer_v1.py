@@ -18,10 +18,10 @@ def load_CIFAR_batch(filename):
         labels=datadict[b'labels']
         return batch_label, data,filename,labels
 
-NUMBER=3
+NUMBER=0
 
 
-batch_label, data,filename,labels = load_CIFAR_batch("/home/gong/tf_learning/cifar-10-python/cifar-10-batches-py/test_batch")
+batch_label, data,filename,labels = load_CIFAR_batch("/root/pytorch_learning/tf_learning/cifar-10-python/cifar-10-batches-py/test_batch")
 
 image1=data[NUMBER].reshape(3,32,32)
 

@@ -29,7 +29,7 @@ plt.scatter(x.data.numpy(),y.data.numpy())
 plt.ion()
 
 #object net, hidden_layersize=10
-net = Net(n_feature=1, n_hidden=100, n_output=1)     # define the network
+net = Net(n_feature=1, n_hidden=10, n_output=1)     # define the network
 print(net) # net architecture
 
 #optimizer define, SGD method,learning rate is 0.5
@@ -46,7 +46,7 @@ for t in range(1000):
     loss.backward()         # backpropagation, compute gradients
     optimizer.step()        # apply gradients
 
-    if t % 5 == 0:
+    if t % 50 == 0:
         # plot and show learning process
         plt.cla()
         plt.scatter(x.data.numpy(), y.data.numpy())

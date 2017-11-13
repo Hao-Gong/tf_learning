@@ -27,7 +27,13 @@ x1=torch.normal(-2*n_data,1)
 #label of the data set 1 is 1
 y1=torch.ones(100)
 
-#FloatTensor = 32-bit
+#FloatTensor = 32-bit float, torch.cat means comblie two matrix into one
 x=torch.cat((x0,x1),0).type(torch.FloatTensor)
-#LongTensor = 64-bit
-y=torch.cat((y0,y1),).type(torch.LongTensor)
+#LongTensor = 64-bit integer
+y=torch.cat((y0,y1),0).type(torch.LongTensor)
+
+x,y=Variable(x),Variable(y)
+
+
+plt.scatter(x.data.numpy()[:,0],x.data.numpy()[:,1],c=y.data.numpy(),s=100,lw=0,cmap='RdYlGn')
+plt.show()
