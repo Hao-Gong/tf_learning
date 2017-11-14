@@ -51,14 +51,13 @@ class CNN(nn.Module):
         output=self.out(x)
         return output,x
 
-
-
-
 EPOCH=1
 BATCH_SIZE=100
 LR=0.001
 DOWNLOAD_MNIST=False
 # DOWNLOAD_MNIST=True
+
+torch.cuda.manual_seed(1)    # reproducible
 
 #load the train datasets and test datasets
 train_data=torchvision.datasets.MNIST(
@@ -78,6 +77,7 @@ test_data=torchvision.datasets.MNIST(
 # reshape from (2000, 28, 28) to (2000, 1, 28, 28), value in range(0,1)
 # only take the front 2000 datasets to check the accuracy
 # test_x = Variable(torch.unsqueeze(test_data.test_data, dim=1), volatile=True).type(torch.FloatTensor)[:2000]/255.
+#test_data.test_data.cuda()
 test_x = Variable(torch.unsqueeze(test_data.test_data, dim=1), volatile=True).type(torch.FloatTensor)[:2000]/255.
 test_y = test_data.test_labels[:2000]
 # print(test_x[0])
@@ -86,6 +86,8 @@ train_loader=Data.DataLoader(dataset=train_data,batch_size=BATCH_SIZE,shuffle=Tr
 
 
 cnn=CNN()
+#set into cuda
+cnn.cuda()
 # print(cnn)
 #
 optimizer = torch.optim.Adam(cnn.parameters(), lr=LR)   # optimize all cnn parameters
@@ -97,6 +99,9 @@ plt.ion()
 for epoch in range(EPOCH):
     # gives batch data, normalize x when iterate train_loader
     for step, (x, y) in enumerate(train_loader):
+        #set into cuda
+        x.cuda()
+        y.cuda()
         b_x = Variable(x)   # batch x
         b_y = Variable(y)   # batch y
         # print(b_x)
@@ -108,6 +113,7 @@ for epoch in range(EPOCH):
 
         if step % 50 == 0:
             test_output, last_layer = cnn(test_x)
+
             pred_y = torch.max(test_output, 1)[1].data.squeeze()
             accuracy = sum(pred_y == test_y) / float(test_y.size(0))
             print('Epoch: ', epoch, '| train loss: %.4f' % loss.data[0], '| test accuracy: %.2f' % accuracy)

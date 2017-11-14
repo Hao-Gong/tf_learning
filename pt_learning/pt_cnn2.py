@@ -55,51 +55,58 @@ class CNN(nn.Module):
 
 
 EPOCH=1
-BATCH_SIZE=100
+BATCH_SIZE=50
 LR=0.001
-DOWNLOAD_MNIST=False
-# DOWNLOAD_MNIST=True
+# DOWNLOAD_MNIST=False
+DOWNLOAD_MNIST=True
 
 #load the train datasets and test datasets
 train_data=torchvision.datasets.MNIST(
     root='./mnist',
     train=True,
-    transform=torchvision.transforms.ToTensor(), #compress from 0-255 to (0,1) float32
+    transform=torchvision.transforms.ToTensor(), #compress from 0-255 to (0,1)
     download=DOWNLOAD_MNIST
 )
 
-# print(train_data.train_data[0])
-test_data=torchvision.datasets.MNIST(
-    root='./mnist/',
-    train=False,
-    transform=torchvision.transforms.ToTensor(), #compress from 0-255 to (0,1) float32
-)
-# print(test_data.test_data[0])
+test_data=torchvision.datasets.MNIST(root='./mnist/', train=False)
+
+# print(train_data.train_data.size())
+# print(train_data.train_labels.size())
+#
+# plt.imshow(train_data.train_data[0].numpy(),cmap='gray')
+# plt.title('%i'%train_data.train_labels[0])
+# plt.show()
+
+train_loader=Data.DataLoader(dataset=train_data,batch_size=BATCH_SIZE,shuffle=True)
 # reshape from (2000, 28, 28) to (2000, 1, 28, 28), value in range(0,1)
 # only take the front 2000 datasets to check the accuracy
-# test_x = Variable(torch.unsqueeze(test_data.test_data, dim=1), volatile=True).type(torch.FloatTensor)[:2000]/255.
 test_x = Variable(torch.unsqueeze(test_data.test_data, dim=1), volatile=True).type(torch.FloatTensor)[:2000]/255.
 test_y = test_data.test_labels[:2000]
-# print(test_x[0])
-#
-train_loader=Data.DataLoader(dataset=train_data,batch_size=BATCH_SIZE,shuffle=True)
-
 
 cnn=CNN()
-# print(cnn)
-#
+print(cnn)
+
 optimizer = torch.optim.Adam(cnn.parameters(), lr=LR)   # optimize all cnn parameters
 loss_func = nn.CrossEntropyLoss()                       # the target label is not one-hotted
 
+# following function (plot_with_labels) is for visualization, can be ignored if not interested
+from matplotlib import cm
+try: from sklearn.manifold import TSNE; HAS_SK = True
+except: HAS_SK = False; print('Please install sklearn for layer visualization')
+def plot_with_labels(lowDWeights, labels):
+    plt.cla()
+    X, Y = lowDWeights[:, 0], lowDWeights[:, 1]
+    for x, y, s in zip(X, Y, labels):
+        c = cm.rainbow(int(255 * s / 9)); plt.text(x, y, s, backgroundcolor=c, fontsize=9)
+    plt.xlim(X.min(), X.max()); plt.ylim(Y.min(), Y.max()); plt.title('Visualize last layer'); plt.show(); plt.pause(0.01)
 
 plt.ion()
 # training and testing
 for epoch in range(EPOCH):
-    # gives batch data, normalize x when iterate train_loader
-    for step, (x, y) in enumerate(train_loader):
+    for step, (x, y) in enumerate(train_loader):   # gives batch data, normalize x when iterate train_loader
         b_x = Variable(x)   # batch x
         b_y = Variable(y)   # batch y
-        # print(b_x)
+
         output = cnn(b_x)[0]               # cnn output
         loss = loss_func(output, b_y)   # cross entropy loss
         optimizer.zero_grad()           # clear gradients for this training step
@@ -111,7 +118,13 @@ for epoch in range(EPOCH):
             pred_y = torch.max(test_output, 1)[1].data.squeeze()
             accuracy = sum(pred_y == test_y) / float(test_y.size(0))
             print('Epoch: ', epoch, '| train loss: %.4f' % loss.data[0], '| test accuracy: %.2f' % accuracy)
-
+            if HAS_SK:
+                # Visualization of trained flatten layer (T-SNE)
+                tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=5000)
+                plot_only = 500
+                low_dim_embs = tsne.fit_transform(last_layer.data.numpy()[:plot_only, :])
+                labels = test_y.numpy()[:plot_only]
+                plot_with_labels(low_dim_embs, labels)
 plt.ioff()
 
 # print 10 predictions from test data

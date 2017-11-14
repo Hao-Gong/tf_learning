@@ -54,10 +54,11 @@ for t in range(100):
     loss.backward()         # backpropagation, compute gradients
     optimizer.step()        # apply gradients
 
-    if t % 20 == 0:
+    if t % 2 == 0:
         # plot and show learning process
         plt.cla()
         #print(out)
+        #[1] return location, [0] return max value
         prediction = torch.max(F.softmax(out), 1)[1]
         #print(torch.max(F.softmax(out), 1))[0]
         #print(prediction)
