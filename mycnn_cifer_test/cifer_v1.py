@@ -1,6 +1,8 @@
 from PIL import Image
 import numpy as np
 import pickle
+import matplotlib.pyplot as plt
+
 
 def unpickle(file):
     with open(file, 'rb') as fo:
@@ -21,7 +23,8 @@ def load_CIFAR_batch(filename):
 NUMBER=0
 
 
-batch_label, data,filename,labels = load_CIFAR_batch("/root/pytorch_learning/tf_learning/cifar-10-python/cifar-10-batches-py/test_batch")
+#batch_label, data,filename,labels = load_CIFAR_batch("/root/pytorch_learning/tf_learning/cifar-10-python/cifar-10-batches-py/test_batch")
+batch_label, data,filename,labels = load_CIFAR_batch("/home/gong/tf_learning/cifar-10-python/cifar-10-batches-py/test_batch")
 
 image1=data[NUMBER].reshape(3,32,32)
 
@@ -33,4 +36,8 @@ img = Image.merge("RGB", (i0, i1, i2))
 print("image_data:",img)
 print("image_label:",labels[NUMBER])
 print("name:",filename[NUMBER])
-img.show()
+#img.show()
+
+plt.imshow(img)
+plt.title('%s'%filename[NUMBER])
+plt.show()
