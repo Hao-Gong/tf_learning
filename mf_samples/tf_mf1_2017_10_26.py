@@ -1,3 +1,4 @@
+#this is learned from MOFAN, LINK: https://morvanzhou.github.io/
 import tensorflow as tf
 # Creates a graph.
 # Creates a graph.

@@ -1,4 +1,6 @@
+#this is learned from MOFAN, LINK: https://morvanzhou.github.io/
 ##About the basic training of the data, y=ax+b
+
 
 import tensorflow as tf
 import numpy as np

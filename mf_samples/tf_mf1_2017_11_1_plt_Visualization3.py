@@ -1,3 +1,4 @@
+#this is learned from MOFAN, LINK: https://morvanzhou.github.io/
 ##About the basic training of the data, y=ax+b
 #!/usr/bin/sudo python
 
