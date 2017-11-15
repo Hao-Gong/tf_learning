@@ -53,7 +53,7 @@ class CNN(nn.Module):
             nn.Conv2d(
                 #in_channels means the input depth
                 in_channels=3,
-                out_channels=48,
+                out_channels=30,
                 kernel_size=3,
                 stride=1,
                 padding=1,  #confirm the size of conv the same size of input
@@ -66,8 +66,8 @@ class CNN(nn.Module):
         self.conv2=nn.Sequential(
             nn.Conv2d(
                 #in_channels means the input depth
-                in_channels=48,
-                out_channels=96,
+                in_channels=30,
+                out_channels=60,
                 kernel_size=3,
                 stride=1,
                 padding=1, #confirm the size of conv the same size of input
@@ -77,12 +77,27 @@ class CNN(nn.Module):
             # -> (96,8,8)
             nn.MaxPool2d(kernel_size=2),
         )
-        self.out=nn.Linear(96*8*8,10)
+        self.conv3=nn.Sequential(
+            nn.Conv2d(
+                #in_channels means the input depth
+                in_channels=60,
+                out_channels=120,
+                kernel_size=3,
+                stride=1,
+                padding=1, #confirm the size of conv the same size of input
+            ),#-> (96,16,16)
+            nn.ReLU(),
+            #2*2 pooling size
+            # -> (96,8,8)
+            nn.MaxPool2d(kernel_size=2),
+        )
+        self.out=nn.Linear(120*4*4,10)
 
     def forward(self,x):
         #use the defined object to construct the true network
         x=self.conv1(x)#(batch,3,32,32)->(batch,48,16,16)
         x=self.conv2(x)#(batch,48,16,16)->(batch,96,8,8)
+        x = self.conv3(x)
         #(96,8,8)->(batch,96*8*8)
         x=x.view(x.size(0),-1)
         output=self.out(x)
@@ -93,9 +108,9 @@ class CNN(nn.Module):
 ###define the global parameter
 ########################################################################################################################
 EPOCH=5
-TRAIN_BATCH_SIZE=100
-TEST_BATCH_SIZE=500
-LR=0.01
+TRAIN_BATCH_SIZE=200
+TEST_BATCH_SIZE=2000
+LR=0.005
 ########################################################################################################################
 
 # batch_label, data, filename, labels = load_CIFAR_batch("/root/pytorch_learning/tf_learning/cifar-10-python/cifar-10-batches-py/test_batch")
@@ -129,12 +144,12 @@ for epoch in range(EPOCH):
         loss.backward()                 # backpropagation, compute gradients
         optimizer.step()                # apply gradients
         #print("step:",step)
-        if step % 50 == 0:
-            for i_test, (x_test, y_test) in enumerate(test_loader):
-                x_t = Variable(x_test)
-                y_t = Variable(y_test)
-                test_output = cnn(x_t)
-                pred_y = torch.max(test_output, 1)[1].data.squeeze()
-                accuracy = sum(pred_y == y_test) / float(y_test.size(0))
-                print('Epoch: ', epoch, '| train loss: %.4f' % loss.data[0], '| test accuracy: %.2f' % accuracy)
-                break
+
+    for i_test, (x_test, y_test) in enumerate(test_loader):
+        x_t = Variable(x_test)
+        y_t = Variable(y_test)
+        test_output = cnn(x_t)
+        pred_y = torch.max(test_output, 1)[1].data.squeeze()
+        accuracy = sum(pred_y == y_test) / float(y_test.size(0))
+        print('Epoch: ', epoch, '| train loss: %.4f' % loss.data[0], '| test accuracy: %.2f' % accuracy)
+        break

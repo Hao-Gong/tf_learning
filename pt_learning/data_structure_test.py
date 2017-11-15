@@ -34,13 +34,6 @@ def ConvetToImg(data):
     return Image.merge("RGB", (i0, i1, i2))
 
 
-def ConverToTensor(data):
-    data_list=[]
-    for i in range(10000):
-        img_tensor = torch.FloatTensor(data[0][i] / 255.)
-        img_tuple = (img_tensor, data[1][i])
-        data_list.append(img_tuple)
-    return data_list
 
 
 class CNN(nn.Module):
@@ -77,64 +70,56 @@ class CNN(nn.Module):
             # -> (96,8,8)
             nn.MaxPool2d(kernel_size=2),
         )
-        self.out=nn.Linear(96*8*8,10)
+        self.out=nn.Linear(32*7*7,10)
 
     def forward(self,x):
         #use the defined object to construct the true network
         x=self.conv1(x)#(batch,3,32,32)->(batch,48,16,16)
         x=self.conv2(x)#(batch,48,16,16)->(batch,96,8,8)
-        #(96,8,8)->(batch,96*8*8)
+        #(32,7,7)->(batch,32*7*7)
         x=x.view(x.size(0),-1)
         output=self.out(x)
-        return output
+        return output,x
 
 
 ########################################################################################################################
 ###define the global parameter
 ########################################################################################################################
-EPOCH=5
-TRAIN_BATCH_SIZE=100
-TEST_BATCH_SIZE=500
-LR=0.01
+EPOCH=1
+TRAIN_BATCH_SIZE=1
+TEST_BATCH_SIZE=1000
+LR=0.001
 ########################################################################################################################
 
-# batch_label, data, filename, labels = load_CIFAR_batch("/root/pytorch_learning/tf_learning/cifar-10-python/cifar-10-batches-py/test_batch")
-##load the train data set
-#data type
 data = load_CIFAR_batch("/home/gong/tf_learning/cifar-10-python/cifar-10-batches-py/data_batch_1")
-train_data=ConverToTensor(data)
-train_loader=Data.DataLoader(dataset=train_data,batch_size=TRAIN_BATCH_SIZE,shuffle=True)
 
-# ##load the test data set
-data_t = load_CIFAR_batch("/home/gong/tf_learning/cifar-10-python/cifar-10-batches-py/test_batch")
-test_data=ConverToTensor(data_t)
-test_loader=Data.DataLoader(dataset=test_data,batch_size=TEST_BATCH_SIZE,shuffle=True)
+img1=torch.FloatTensor(data[0][0]/255.)
+img2=torch.FloatTensor(data[0][1]/255.)
+img3=torch.FloatTensor(data[0][2]/255.)
+l1=(img1,data[1][0])
+l2=(img2,data[1][1])
+l3=(img3,data[1][2])
+L=[]
+L.append(l1)
+L.append(l2)
+L.append(l3)
 
-cnn=CNN()
-print(cnn)
+# print(L)
 
-optimizer = torch.optim.Adam(cnn.parameters(), lr=LR)   # optimize all cnn parameters
-loss_func = nn.CrossEntropyLoss()                       # the target label is not one-hotted
-
-# training and testing
+# t1=([1,1],1)
+# t2=([2,2],2)
+# t3=([3,3],3)
+# L.append(t1)
+# L.append(t2)
+# L.append(t3)
+# # print(type(L[0][0]))
+# data=torch.FloatTensor(L)
+train_loader=Data.DataLoader(dataset=L,batch_size=TRAIN_BATCH_SIZE,shuffle=True)
+#
 for epoch in range(EPOCH):
     # gives batch data, normalize x when iterate train_loader
-    for step, (x, y) in enumerate(train_loader):
+    for step, (x ,y) in enumerate(train_loader):
         b_x = Variable(x)   # batch x
-        b_y = Variable(y)   # batch y
-        # print(b_x)
-        output = cnn(b_x)               # cnn output
-        loss = loss_func(output, b_y)   # cross entropy loss
-        optimizer.zero_grad()           # clear gradients for this training step
-        loss.backward()                 # backpropagation, compute gradients
-        optimizer.step()                # apply gradients
-        #print("step:",step)
-        if step % 50 == 0:
-            for i_test, (x_test, y_test) in enumerate(test_loader):
-                x_t = Variable(x_test)
-                y_t = Variable(y_test)
-                test_output = cnn(x_t)
-                pred_y = torch.max(test_output, 1)[1].data.squeeze()
-                accuracy = sum(pred_y == y_test) / float(y_test.size(0))
-                print('Epoch: ', epoch, '| train loss: %.4f' % loss.data[0], '| test accuracy: %.2f' % accuracy)
-                break
+        b_y = Variable(y)
+        #print()
+        print(b_y)

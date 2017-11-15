@@ -32,6 +32,7 @@ x=torch.cat((x0,x1),0).type(torch.FloatTensor)
 #LongTensor = 64-bit integer
 y=torch.cat((y0,y1),0).type(torch.LongTensor)
 
+
 x,y=Variable(x),Variable(y)
 
 

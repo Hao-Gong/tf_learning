@@ -83,8 +83,11 @@ test_y = test_data.test_labels[:2000]
 # print(test_x[0])
 #
 train_loader=Data.DataLoader(dataset=train_data,batch_size=BATCH_SIZE,shuffle=True)
+#train_data[0] is tuple
+#print(train_data[2][1].size())
 
 
+# #print(train_data.shape)
 cnn=CNN()
 # print(cnn)
 #
