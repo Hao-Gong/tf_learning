@@ -10,10 +10,6 @@ import torch.utils.data as Data
 import torch.nn as nn
 import torchvision
 
-def unpickle(file):
-    with open(file, 'rb') as fo:
-        dict = pickle.load(fo, encoding='bytes')
-    return dict
 
 
 def load_CIFAR_batch(filename):
