@@ -118,7 +118,7 @@ LR=0.001
 #data type
 try:
     #path of my GPU computer
-    data = load_CIFAR_batch("/root/pytorch_learning/tf_learning/cifar-10-python/cifar-10-batches-py/data_batch_1")
+    data = load_CIFAR_batch("/home/diamous/tf_learning/cifar-10-python/cifar-10-batches-py/data_batch_1")
 except:
     # path of my CPU computer
     data = load_CIFAR_batch("/home/gong/tf_learning/cifar-10-python/cifar-10-batches-py/data_batch_1")
@@ -128,7 +128,7 @@ train_loader=Data.DataLoader(dataset=train_data,batch_size=TRAIN_BATCH_SIZE,shuf
 
 # ##load the test data set
 try:
-    data_t = load_CIFAR_batch("/root/pytorch_learning/tf_learning/cifar-10-python/cifar-10-batches-py/test_batch")
+    data_t = load_CIFAR_batch("/home/diamous/tf_learning/cifar-10-python/cifar-10-batches-py/test_batch")
 except:
     data_t = load_CIFAR_batch("/home/gong/tf_learning/cifar-10-python/cifar-10-batches-py/test_batch")
 test_data=ConverToTensor(data_t)
