@@ -12,9 +12,9 @@ class NGramLanguageModeler(nn.Module):
         super(NGramLanguageModeler, self).__init__()
         #将单词嵌入到embedding_dim维的向量中去
         self.embeddings = nn.Embedding(vocab_size, embedding_dim)
-        #全链接神经网络第一个hidden layer的神经单元数128
+        #全链接神经网络第一个hidden layer的神经单元数500
         self.linear1 = nn.Linear(context_size * embedding_dim, 500)
-        #128个神经单元最终映射到词汇表的大小向量中，毕竟每个单词都要计算概率
+        #500个神经单元最终映射到词汇表的大小向量中，毕竟每个单词都要计算概率
         self.linear2 = nn.Linear(500, vocab_size)
 
     #定义forwar的实现定义
