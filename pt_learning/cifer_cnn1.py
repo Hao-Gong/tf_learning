@@ -123,7 +123,7 @@ for epoch in range(EPOCH):
     for step, (x, y) in enumerate(train_loader):
         b_x = Variable(x)   # batch x
         b_y = Variable(y)   # batch y
-        # print(b_x.size())
+        print(b_x.size())
         output = cnn(b_x)               # cnn output
         loss = loss_func(output, b_y)   # cross entropy loss
         optimizer.zero_grad()           # clear gradients for this training step

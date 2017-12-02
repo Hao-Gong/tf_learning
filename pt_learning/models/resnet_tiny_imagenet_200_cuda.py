@@ -255,7 +255,7 @@ TINY_PATH_TRAIN='/home/gong/tiny-imagenet-200/train/'
 image_train=read_train_data()
 
 cnn=CNN()
-print(cnn)
+cnn.cuda()
 
 optimizer = torch.optim.Adam(cnn.parameters(), lr=0.005)   # optimize all cnn parameters
 loss_func = nn.CrossEntropyLoss()
@@ -264,8 +264,8 @@ loss_func = nn.CrossEntropyLoss()
 for epoch in range(1):
     for batch in train_batch_load(batch_size=50):
         print(batch[0].size())
-        b_x = Variable(batch[0])   # batch x
-        b_y = Variable(batch[1])   # batch y
+        b_x = Variable(batch[0]).cuda()   # batch x
+        b_y = Variable(batch[1]).cuda()   # batch y
         # print(b_y)
         # print(b_x.size())
         output = cnn(b_x)               # cnn output
@@ -274,8 +274,8 @@ for epoch in range(1):
         loss.backward()                 # backpropagation, compute gradients
         optimizer.step()                # apply gradients
 
-    x_t = Variable(batch[0])  # batch x
-    y_t = Variable(batch[1])  # batch y
+    x_t = Variable(batch[0].cuda(), volatile=True)  # batch x
+    y_t = Variable(batch[1].cuda())  # batch y
     test_output = cnn(x_t)
     pred_y = torch.max(test_output, 1)[1].data.squeeze()
     accuracy = sum(pred_y == y_t) / float(y_t.size(0))
