@@ -92,7 +92,7 @@ class CNN(nn.Module):
 ########################################################################################################################
 ###define the global parameter
 ########################################################################################################################
-EPOCH=5
+EPOCH=1
 TRAIN_BATCH_SIZE=100
 TEST_BATCH_SIZE=500
 LR=0.01
@@ -103,6 +103,7 @@ LR=0.01
 #data type
 data = load_CIFAR_batch("/home/gong/tf_learning/cifar-10-python/cifar-10-batches-py/data_batch_1")
 train_data=ConverToTensor(data)
+# print(np.shape(train_data))
 train_loader=Data.DataLoader(dataset=train_data,batch_size=TRAIN_BATCH_SIZE,shuffle=True)
 
 # ##load the test data set
@@ -122,7 +123,7 @@ for epoch in range(EPOCH):
     for step, (x, y) in enumerate(train_loader):
         b_x = Variable(x)   # batch x
         b_y = Variable(y)   # batch y
-        # print(b_x)
+        # print(b_x.size())
         output = cnn(b_x)               # cnn output
         loss = loss_func(output, b_y)   # cross entropy loss
         optimizer.zero_grad()           # clear gradients for this training step
@@ -133,6 +134,7 @@ for epoch in range(EPOCH):
             for i_test, (x_test, y_test) in enumerate(test_loader):
                 x_t = Variable(x_test)
                 y_t = Variable(y_test)
+                print(x_t.size())
                 test_output = cnn(x_t)
                 pred_y = torch.max(test_output, 1)[1].data.squeeze()
                 accuracy = sum(pred_y == y_test) / float(y_test.size(0))
