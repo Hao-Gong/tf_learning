@@ -190,7 +190,7 @@ image_test_tensor=torch.unsqueeze(image_test_trans(image_test),0)
 image_test_Val=Variable(image_test_tensor)
 
 
-net18 = model = ResNet(BasicBlock, [2, 2, 2, 2], image_size=224)
-# print(net18)
+net18 = ResNet(BasicBlock, [2, 2, 2, 2], image_size=224)
+print(net18)
 print(net18(Variable(torch.randn(1,3,224,224))).size())
 # result=net(Variable(torch.randn(1,3,32,32)))

@@ -97,7 +97,7 @@ class Bottleneck(nn.Module):
 class ResNet(nn.Module):
     #block就是你要调用的基本单元BasicBlock/Bottleneck
     #layer is [,,,]，其中的元素就是4次构建基本模块的时候分别调用几次
-    def __init__(self, block, layers, image_size, num_classes=1000):
+    def __init__(self, block, layers, num_classes=200):
         self.inplanes = 64
         super(ResNet, self).__init__()
         #[,3,image_size,image_size]->[,64,image_size/2,image_size/2]
@@ -117,7 +117,7 @@ class ResNet(nn.Module):
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
         #平均池化层
         # [,512,image_size/32,image_size/32]->[,512,image_size/224,image_size/224]
-        self.avgpool = nn.AvgPool2d(7, stride=1)
+        self.avgpool = nn.AvgPool2d(2, stride=1)
         # [, 512, image_size / 224, image_size / 224]->[,1000]
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
@@ -172,33 +172,6 @@ class ResNet(nn.Module):
 
         return x
 
-class CNN(nn.Module):
-    def __init__(self):
-        super(CNN, self).__init__()
-
-        ##define the network objects
-        # input size (3,64,64)
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(
-                # in_channels means the input depth
-                in_channels=3,
-                out_channels=48,
-                kernel_size=3,
-                stride=1,
-                padding=1,  # confirm the size of conv the same size of input
-            ),  # -> (48,64,64)
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2),
-        )
-        self.out = nn.Linear(48 * 32 * 32, 200)
-
-    def forward(self, x):
-        # use the defined object to construct the true network
-        x = self.conv1(x)  # (batch,3,32,32)->(batch,48,16,16)
-        x = x.view(x.size(0), -1)
-        output = self.out(x)
-        return output
-
 
 #读取train_data,输出格式[path,(label,x_s,y_s,x_e,y_e)]
 def read_train_data():
@@ -251,32 +224,32 @@ def train_batch_load(batch_size=50):
 
 TINY_PATH_ROOT='/home/gong/tiny-imagenet-200/'
 TINY_PATH_TRAIN='/home/gong/tiny-imagenet-200/train/'
-
+BATCH_SIZE=200
 image_train=read_train_data()
 
-cnn=CNN()
-cnn.cuda()
+resnet18 = ResNet(BasicBlock, [2, 2, 2, 2])
+resnet18.cuda()
+# print(resnet18(Variable(torch.randn(50,3,64,64))).size())
 
-optimizer = torch.optim.Adam(cnn.parameters(), lr=0.005)   # optimize all cnn parameters
+optimizer = torch.optim.Adam(resnet18.parameters(), lr=0.001)   # optimize all cnn parameters
 loss_func = nn.CrossEntropyLoss()
 
 # print(cnn(Variable(torch.randn(1,3,64,64))))
+
 for epoch in range(1):
-    for batch in train_batch_load(batch_size=50):
-        print(batch[0].size())
+    for batch in train_batch_load(batch_size=BATCH_SIZE):
+        # print(batch[0].size())
         b_x = Variable(batch[0]).cuda()   # batch x
         b_y = Variable(batch[1]).cuda()   # batch y
         # print(b_y)
         # print(b_x.size())
-        output = cnn(b_x)               # cnn output
+        output = resnet18(b_x)               # cnn output
         loss = loss_func(output, b_y)   # cross entropy loss
         optimizer.zero_grad()           # clear gradients for this training step
         loss.backward()                 # backpropagation, compute gradients
         optimizer.step()                # apply gradients
 
-    x_t = Variable(batch[0].cuda(), volatile=True)  # batch x
-    y_t = Variable(batch[1].cuda())  # batch y
-    test_output = cnn(x_t)
-    pred_y = torch.max(test_output, 1)[1].data.squeeze()
-    accuracy = sum(pred_y == y_t) / float(y_t.size(0))
-    print('Epoch: ', epoch, '| train loss: %.4f' % loss.data[0], '| test accuracy: %.2f' % accuracy)
+        # print(type(batch[1]))
+        pred_y = torch.max(output, 1)[1].data.squeeze()
+        accuracy = sum(pred_y == batch[1]) / float(BATCH_SIZE)
+        print('Epoch: ', epoch, '| train loss: %.4f' % loss.data[0], '| test accuracy: %.2f' % accuracy)

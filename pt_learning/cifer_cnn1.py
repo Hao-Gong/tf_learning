@@ -123,6 +123,7 @@ for epoch in range(EPOCH):
     for step, (x, y) in enumerate(train_loader):
         b_x = Variable(x)   # batch x
         b_y = Variable(y)   # batch y
+        print(type(y))
         print(b_x.size())
         output = cnn(b_x)               # cnn output
         loss = loss_func(output, b_y)   # cross entropy loss
