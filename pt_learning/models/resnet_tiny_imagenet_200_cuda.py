@@ -203,6 +203,7 @@ def check_grey(im_t):
 
 
 def train_batch_load(batch_size=50):
+    random.shuffle(image_train)
     image_trans = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
     for cursor in range(0, len(image_train), batch_size):
         image_batch = torch.unsqueeze(check_grey(image_trans(Image.open(image_train[cursor][0]))), 0)
@@ -219,8 +220,14 @@ def train_batch_load(batch_size=50):
         batch.append(image_batch)
         batch.append(label_batch)
         batch.append(box_batch)
-        print(cursor)
+        # print(cursor)
         yield batch
+
+def adjust_learning_rate(optimizer, epoch):
+    lr = 0.01 * (0.1 ** (int(epoch/2)+1))
+    print("learning rate",lr)
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
 
 TINY_PATH_ROOT='/home/diamous/tiny-imagenet-200/'
 TINY_PATH_TRAIN='/home/diamous/tiny-imagenet-200/train/'
@@ -228,16 +235,16 @@ BATCH_SIZE=500
 image_train=read_train_data()
 
 resnet18 = ResNet(BasicBlock, [2, 2, 2, 2])
-resnet18.load_state_dict(torch.load('resnet18_1_params.pkl'))
+resnet18.load_state_dict(torch.load('/home/diamous/tf_learning/pt_learning/models/resnet18_2_params.pkl'))
 resnet18.cuda()
 # print(resnet18(Variable(torch.randn(50,3,64,64))).size())
 
-optimizer = torch.optim.Adam(resnet18.parameters(), lr=0.00005)   # optimize all cnn parameters
+optimizer = torch.optim.Adam(resnet18.parameters(), lr=0.001)   # optimize all cnn parameters
 loss_func = nn.CrossEntropyLoss()
 
 # print(cnn(Variable(torch.randn(1,3,64,64))))
 
-for epoch in range(1):
+for epoch in range(10):
     for batch in train_batch_load(batch_size=BATCH_SIZE):
         # print(batch[0].size())
         b_x = Variable(batch[0].cuda())   # batch x
@@ -250,13 +257,13 @@ for epoch in range(1):
         loss.backward()                 # backpropagation, compute gradients
         optimizer.step()                # apply gradients
 
-        x_test=Variable(batch[0].cuda(), volatile=True)
-        y_test = Variable(batch[1].cuda())
-        test_output = resnet18(x_test)
-        pred = test_output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
-        correct = pred.eq(y_test.data.view_as(pred)).cpu().sum()/BATCH_SIZE
-        print('Epoch: ', epoch,'| test accuracy: %.2f' % correct)
+    x_test=Variable(batch[0].cuda(), volatile=True)
+    y_test = Variable(batch[1].cuda())
+    test_output = resnet18(x_test)
+    pred = test_output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
+    correct = pred.eq(y_test.data.view_as(pred)).cpu().sum()/BATCH_SIZE
+    print('Epoch: ', epoch,'| test accuracy: %.2f' % correct)
+    adjust_learning_rate(optimizer, epoch)
 
-
-torch.save(resnet18, '/home/diamous/tf_learning/pt_learning/models/resnet18_1.pkl')  # save entire net
-torch.save(resnet18.state_dict(), '/home/diamous/tf_learning/pt_learning/models/resnet18_1_params.pkl') # save only the parameters
+torch.save(resnet18, '/home/diamous/tf_learning/pt_learning/models/resnet18_3.pkl')  # save entire net
+torch.save(resnet18.state_dict(), '/home/diamous/tf_learning/pt_learning/models/resnet18_3_params.pkl') # save only the parameters
