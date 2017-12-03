@@ -228,6 +228,7 @@ BATCH_SIZE=500
 image_train=read_train_data()
 
 resnet18 = ResNet(BasicBlock, [2, 2, 2, 2])
+resnet18.load_state_dict(torch.load('resnet18_1_params.pkl'))
 resnet18.cuda()
 # print(resnet18(Variable(torch.randn(50,3,64,64))).size())
 
@@ -236,7 +237,7 @@ loss_func = nn.CrossEntropyLoss()
 
 # print(cnn(Variable(torch.randn(1,3,64,64))))
 
-for epoch in range(2):
+for epoch in range(1):
     for batch in train_batch_load(batch_size=BATCH_SIZE):
         # print(batch[0].size())
         b_x = Variable(batch[0].cuda())   # batch x
@@ -257,5 +258,5 @@ for epoch in range(2):
         print('Epoch: ', epoch,'| test accuracy: %.2f' % correct)
 
 
-torch.save(resnet18, 'resnet18_1.pkl')  # save entire net
-torch.save(resnet18.state_dict(), 'resnet18_1_params.pkl') # save only the parameters
+torch.save(resnet18, '/home/diamous/tf_learning/pt_learning/models/resnet18_1.pkl')  # save entire net
+torch.save(resnet18.state_dict(), '/home/diamous/tf_learning/pt_learning/models/resnet18_1_params.pkl') # save only the parameters
