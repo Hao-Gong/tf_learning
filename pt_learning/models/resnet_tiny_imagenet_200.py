@@ -11,6 +11,8 @@ import os
 import numpy as np
 import random
 
+
+
 #定义一个3×3的卷积层，后面多次调用，方便使用，尺寸不变，plane是深度的意思
 def conv3x3(in_planes, out_planes, stride=1):
     "3x3 convolution with padding"
@@ -176,6 +178,7 @@ class ResNet(nn.Module):
 #读取train_data,输出格式[path,(label,x_s,y_s,x_e,y_e)]
 def read_train_data():
     image_list = []
+
     with open(TINY_PATH_ROOT + 'wnids.txt', 'r') as f:
         data = f.read()
     file_name = data.split()
@@ -224,11 +227,12 @@ def train_batch_load(batch_size=50):
 
 TINY_PATH_ROOT='/home/gong/tiny-imagenet-200/'
 TINY_PATH_TRAIN='/home/gong/tiny-imagenet-200/train/'
+
 BATCH_SIZE=200
 image_train=read_train_data()
 
 resnet18 = ResNet(BasicBlock, [2, 2, 2, 2])
-print(resnet18(Variable(torch.randn(50,3,64,64))).size())
+# print(resnet18(Variable(torch.randn(50,3,64,64))).size())
 
 optimizer = torch.optim.Adam(resnet18.parameters(), lr=0.001)   # optimize all cnn parameters
 loss_func = nn.CrossEntropyLoss()

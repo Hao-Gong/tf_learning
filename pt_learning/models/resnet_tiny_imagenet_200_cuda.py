@@ -222,25 +222,25 @@ def train_batch_load(batch_size=50):
         print(cursor)
         yield batch
 
-TINY_PATH_ROOT='/home/gong/tiny-imagenet-200/'
-TINY_PATH_TRAIN='/home/gong/tiny-imagenet-200/train/'
-BATCH_SIZE=200
+TINY_PATH_ROOT='/home/diamous/tiny-imagenet-200/'
+TINY_PATH_TRAIN='/home/diamous/tiny-imagenet-200/train/'
+BATCH_SIZE=500
 image_train=read_train_data()
 
 resnet18 = ResNet(BasicBlock, [2, 2, 2, 2])
 resnet18.cuda()
 # print(resnet18(Variable(torch.randn(50,3,64,64))).size())
 
-optimizer = torch.optim.Adam(resnet18.parameters(), lr=0.001)   # optimize all cnn parameters
+optimizer = torch.optim.Adam(resnet18.parameters(), lr=0.00005)   # optimize all cnn parameters
 loss_func = nn.CrossEntropyLoss()
 
 # print(cnn(Variable(torch.randn(1,3,64,64))))
 
-for epoch in range(1):
+for epoch in range(2):
     for batch in train_batch_load(batch_size=BATCH_SIZE):
         # print(batch[0].size())
-        b_x = Variable(batch[0]).cuda()   # batch x
-        b_y = Variable(batch[1]).cuda()   # batch y
+        b_x = Variable(batch[0].cuda())   # batch x
+        b_y = Variable(batch[1].cuda()) # batch y
         # print(b_y)
         # print(b_x.size())
         output = resnet18(b_x)               # cnn output
@@ -249,7 +249,13 @@ for epoch in range(1):
         loss.backward()                 # backpropagation, compute gradients
         optimizer.step()                # apply gradients
 
-        # print(type(batch[1]))
-        pred_y = torch.max(output, 1)[1].data.squeeze()
-        accuracy = sum(pred_y == batch[1]) / float(BATCH_SIZE)
-        print('Epoch: ', epoch, '| train loss: %.4f' % loss.data[0], '| test accuracy: %.2f' % accuracy)
+        x_test=Variable(batch[0].cuda(), volatile=True)
+        y_test = Variable(batch[1].cuda())
+        test_output = resnet18(x_test)
+        pred = test_output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
+        correct = pred.eq(y_test.data.view_as(pred)).cpu().sum()/BATCH_SIZE
+        print('Epoch: ', epoch,'| test accuracy: %.2f' % correct)
+
+
+torch.save(resnet18, 'resnet18_1.pkl')  # save entire net
+torch.save(resnet18.state_dict(), 'resnet18_1_params.pkl') # save only the parameters
