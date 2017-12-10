@@ -225,6 +225,12 @@ def train_batch_load(batch_size=50):
         print(cursor)
         yield batch
 
+def adjust_learning_rate(optimizer, epoch):
+    """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
+    lr = args.lr * (0.1 ** (epoch // 30))
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
+
 TINY_PATH_ROOT='/home/gong/tiny-imagenet-200/'
 TINY_PATH_TRAIN='/home/gong/tiny-imagenet-200/train/'
 

@@ -195,7 +195,7 @@ def read_train_data():
     random.shuffle(image_list)
     return image_list
 
-#读取train_data,输出格式[path,(label,x_s,y_s,x_e,y_e)]
+#读取validate_data,输出格式[path,label,(x_s,y_s,x_e,y_e)]
 def read_validate_data():
     image_list = []
     with open(TINY_PATH_ROOT + 'wnids.txt', 'r') as f:
@@ -223,7 +223,7 @@ def check_grey(im_t):
         return torch.cat((im_t,im_t,im_t),0)
 
 
-def train_batch_load(batch_size=50):
+def train_batch_load(batch_size=500):
     random.shuffle(image_train)
     image_trans = torchvision.transforms.Compose([torchvision.transforms.ToTensor()])
     for cursor in range(0, len(image_train), batch_size):
@@ -271,6 +271,7 @@ def adjust_learning_rate(optimizer, epoch):
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
+#放图片的根目录
 ROOT_PATH='/home/diamous'
 TINY_PATH_ROOT=ROOT_PATH+'/tiny-imagenet-200/'
 TINY_PATH_TRAIN=ROOT_PATH+'/tiny-imagenet-200/train/'
